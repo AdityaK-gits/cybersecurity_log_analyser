@@ -80,6 +80,14 @@ cybersecurity_log_analyser/
 👤 Aditya Kolluru
 💼 B.Tech CSE | Cybersecurity & AI Enthusiast
 📍 MS Ramaiah University of Applied Sciences
+
+🌐 Streamlit Web App (Interactive UI)
+
+Launch the web dashboard:
+
+https://cybersecurityloganalyser-fa2enc9yd6rar9tesypg22.streamlit.app/
+
+
 ⭐ Future Enhancements
 
 Add visualization charts for alert distribution
