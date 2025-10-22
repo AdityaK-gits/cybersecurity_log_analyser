@@ -1,0 +1,2 @@
+streamlit==1.50.0
+# Add any other dependencies required by log_analyzer.py here (if you install extra libs later)
