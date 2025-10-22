@@ -14,9 +14,6 @@ C:/Users/HP/AppData/Local/Programs/Python/Python311/python.exe -m pip install -r
 C:/Users/HP/AppData/Local/Programs/Python/Python311/python.exe -m streamlit run app.py
 ```
 
-Deploy to Streamlit Community Cloud:
-1. Create a GitHub repo and push these files.
-2. On https://share.streamlit.io, create a new app pointing at this repo and `app.py`.
 
 Notes:
 - `app.py` calls `subprocess.run(["python", "log_analyzer.py", ...])` so ensure `python` on PATH points to the same Python environment or modify `app.py` to use the absolute Python path.
