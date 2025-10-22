@@ -73,7 +73,8 @@ cybersecurity_log_analyser/
 📊 Example Streamlit UI
 
 🧩 Dashboard Preview:
-<img width="927" height="530" alt="Screenshot 2025-10-22 200417" src="https://github.com/user-attachments/assets/c9eea0d9-5598-4266-88f0-d37bc7726c94" />
+<img width="1359" height="574" alt="Screenshot 2025-10-22 202840" src="https://github.com/user-attachments/assets/1a9532e5-e36b-4b82-b516-28095fef2d92" />
+
 <img width="1281" height="434" alt="Screenshot 2025-10-22 200432" src="https://github.com/user-attachments/assets/52f9887e-ff5b-4a2c-a4be-98ea9323a769" />
 🧑‍💻 Author
 
