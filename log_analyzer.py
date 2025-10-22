@@ -66,7 +66,7 @@ class LogAnalyzer:
         
         actions = ["LOGIN", "LOGOUT", "FILE_ACCESS", "QUERY", "REQUEST"]
         files = ["/etc/passwd", "/var/log/auth.log", "/home/user/document.txt", 
-                "/root/.ssh/id_rsa", "/etc/shadow", "config.php"]
+                 "/root/.ssh/id_rsa", "/etc/shadow", "config.php"]
         
         start_time = datetime.now() - timedelta(hours=24)
         
@@ -139,30 +139,33 @@ class LogAnalyzer:
             return None
         
         try:
-            # Extract timestamp
+            # 1. Extract timestamp
             timestamp_match = re.match(r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})", line)
             if not timestamp_match:
+                # If the line doesn't start with the expected timestamp format, skip it
                 return None
             
             timestamp_str = timestamp_match.group(1)
             timestamp = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S")
             
-            # Extract IP
-            ip_match = re.search(r"ip=(\S+)", line)
-            ip = ip_match.group(1) if ip_match else "unknown"
+            # 2. Extract IP (made more robust)
+            ip_match = re.search(r"ip=(\S+)|(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})", line)
+            # If 'ip=' tag is present, use it; otherwise, try to find any bare IP address
+            ip = ip_match.group(1) or ip_match.group(2) if ip_match else "unknown"
             
-            # Extract user
+            # 3. Extract user (made more robust)
             user_match = re.search(r"user=(\S+)", line)
-            user = user_match.group(1) if user_match else "unknown"
+            user = user_match.group(1) if user_match else "guest" # Default to 'guest' if no user found
             
             # Determine log type and extract specific data
             log_data = {
                 "timestamp": timestamp,
-                "ip": ip,
-                "user": user,
+                "ip": ip.strip(","), # Clean up possible trailing comma/chars
+                "user": user.strip(","),
                 "raw": line
             }
             
+            # The rest of the parsing logic remains the same and is solid for the generated format
             if "LOGIN FAILED" in line:
                 log_data["type"] = "login_failed"
             elif "LOGIN SUCCESS" in line:
@@ -179,12 +182,22 @@ class LogAnalyzer:
                 log_data["type"] = "request"
                 endpoint_match = re.search(r"REQUEST (\S+)", line)
                 log_data["endpoint"] = endpoint_match.group(1) if endpoint_match else ""
+            else:
+                # Catch-all for other log types like LOGOUT or unparsed lines
+                log_data["type"] = "other" 
             
             return log_data
         
         except Exception as e:
+            # This is important for debugging issues with user-uploaded files
             print(f"Error parsing line: {line[:50]}... - {e}")
             return None
+
+    # ... (All other detection methods like detect_brute_force, detect_sql_injection, etc., remain the same)
+    
+    # NOTE: You can remove the rest of the class methods here for brevity, 
+    # as they were not changed and are already correct, but they MUST remain in your actual file.
+
 
     def add_alert(self, alert_type: str, message: str, severity: str = "MEDIUM", **kwargs):
         """Add an alert to the alerts list."""
@@ -207,6 +220,7 @@ class LogAnalyzer:
         
         color = severity_color.get(severity, "\033[0m")
         print(f"{color}[{severity} ALERT] {alert_type}: {message}\033[0m")
+
 
     def detect_brute_force(self, log_data: Dict):
         """Detect brute force attacks based on failed login attempts."""
@@ -419,13 +433,13 @@ def main():
     """Main function to run the log analyzer."""
     parser = argparse.ArgumentParser(description="Cybersecurity Log Analyzer")
     parser.add_argument("--generate", "-g", action="store_true", 
-                       help="Generate sample logs")
+                        help="Generate sample logs")
     parser.add_argument("--logs", "-l", default="sample_logs.log",
-                       help="Log file to analyze (default: sample_logs.log)")
+                        help="Log file to analyze (default: sample_logs.log)")
     parser.add_argument("--num-logs", "-n", type=int, default=1000,
-                       help="Number of sample logs to generate (default: 1000)")
+                        help="Number of sample logs to generate (default: 1000)")
     parser.add_argument("--report", "-r", default="security_report.txt",
-                       help="Output report file (default: security_report.txt)")
+                        help="Output report file (default: security_report.txt)")
     
     args = parser.parse_args()
     
@@ -443,6 +457,16 @@ def main():
         # Generate reports
         analyzer.generate_report(args.report)
         analyzer.save_alerts("alerts.json")
+        
+        # --- NEW: Cleanup for uploaded files ---
+        # The 'uploaded_logs.log' file is temporary and should be removed after analysis
+        if args.logs == "uploaded_logs.log":
+            try:
+                os.remove(args.logs)
+                print(f"\nCleanup: Removed temporary file {args.logs}")
+            except OSError as e:
+                print(f"\nCleanup Warning: Could not remove temporary file {args.logs}: {e}")
+        # --------------------------------------
         
         print(f"\n🔒 Analysis complete! Check {args.report} for detailed findings.")
     else:
